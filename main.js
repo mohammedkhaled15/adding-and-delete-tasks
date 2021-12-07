@@ -7,74 +7,69 @@ let taskName = document.querySelector("input[name=taskName]");
 //Declaring variable for container of the created tasks
 let addedTasks = document.querySelector(".added-tasks");
 
-var arr = [];
 
-//Firing events on loading of the page
-window.onload = function () {
-  //first check of there is no localstorage records
-  if (window.localStorage.length === 0) {
-    //Creating event for the button of adding element
-    adding.addEventListener("click", function () {
-      let task = document.createElement("div"); //Creating the task
-      task.id = window.localStorage.length + 1; //attatching ID for the task equal to
-      task.classList.add("task");
-      task.innerHTML = taskName.value;
-      addedTasks.append(task);
+if(window.localStorage.length === 0){ //Check if localstorage has stored data to show it first
+  
+  //Do Nothing ..
 
-      let deletBtn = document.createElement("button");
-      deletBtn.classList.add("delete");
-      deletBtn.innerHTML = "Delete";
-      task.append(deletBtn);
+}else{
 
-      window.localStorage.setItem(task.id, task.innerHTML);
+  for(let [key,value]of Object.entries(localStorage)){ // Using for/of loop to iterate on object's values
 
-      document.querySelectorAll(".delete").forEach(function (a) {
-        a.addEventListener("click", function (e) {
-          this.parentElement.remove();
-          window.localStorage.removeItem(this.parentElement.id);
-        });
-      });
-    });
-  } else {
-    for (let j = 0; j < window.localStorage.length; j++) {
-      arr.push(window.localStorage.key(j));
-    }
+    addedTasks.innerHTML += `<div class = "task">${key}<button>Delete</button></div>` // adding content to addedTsaks div beside button of delete
 
-    for (let i = 0; i < window.localStorage.length; i++) {
-      let task = document.createElement("div");
-      task.id = window.localStorage.key(i);
-      task.classList.add("task");
-      task.innerHTML = window.localStorage.getItem(window.localStorage.key(i));
-      addedTasks.append(task);
-    }
-
-    document.querySelectorAll(".delete").forEach(function (a) {
-      a.addEventListener("click", function (e) {
-        this.parentElement.remove();
-        window.localStorage.removeItem(this.parentElement.id);
-      });
-    });
-
-    adding.addEventListener("click", function () {
-      let task = document.createElement("div");
-      task.id = Math.max(...arr);
-      task.classList.add("task");
-      task.innerHTML = taskName.value;
-      addedTasks.append(task);
-
-      let deletBtn = document.createElement("button");
-      deletBtn.classList.add("delete");
-      deletBtn.innerHTML = "Delete";
-      task.append(deletBtn);
-
-      window.localStorage.setItem(`${Number(task.id) + 1}`, task.innerHTML);
-
-      document.querySelectorAll(".delete").forEach(function (a) {
-        a.addEventListener("click", function (e) {
-          this.parentElement.remove();
-          window.localStorage.removeItem(this.parentElement.id);
-        });
-      });
-    });
   }
-};
+
+  del(); // Function used to delete records from local storage and addedTasks div
+
+}
+
+adding.addEventListener("click", function(){ // Adding function to the click of Add button
+  
+  if(taskName.value ==="" && addedTasks.innerHTML === ""){ // Check of the input empty and no divs exist
+
+    addedTasks.innerHTML = `<h3>Please don't leave input empty</h3>` // Showing message
+
+  }else if(taskName.value ==="" && addedTasks.innerHTML !== ""){ // Check of the input empty and divs exist in the main div
+
+    alert("Please don't leave input empty") 
+    
+  }else{ // In case of input has value
+      
+      if(localStorage.getItem(taskName.value)){ // Checking first if the value exists in the local storage
+
+        alert("Please Don't Repeat Entry") // Preventing user from repeating values
+
+      }else{
+
+        if(addedTasks.innerHTML === `<h3>Please don't leave input empty</h3>`){addedTasks.innerHTML = ""} // In case of there is a previous message from last empty entry we wil delete it to recieve new divs
+
+        addedTasks.innerHTML += `<div class = "task">${taskName.value}<button>Delete</button></div>`// adding content to addedTsaks div beside button of delete
+
+        window.localStorage.setItem(taskName.value,"test") // Recording value in the local storage
+
+        taskName.value = ""
+
+        del(); // Function used to delete records from local storage and addedTasks div
+
+      }
+
+  }
+
+})
+
+function del(){ // Function Responsible for deletion from localstorage and div results
+
+  document.querySelectorAll(".task > button").forEach(function(del){ // Selecting All Delete Buttons and using forEach by passing (del) arrgument through 
+
+    del.addEventListener("click", function(a){ // adding event a click for each arrgu passed through the higher order function
+
+      this.parentElement.remove() // "this" Here refer to selected button and parent element is the div with class task
+
+      localStorage.removeItem(this.previousSibling.wholeText) // Deleting record from localstorage by usng wholeText which convert textNode(previousSibling)to pure string
+
+    })
+
+  })
+
+}
